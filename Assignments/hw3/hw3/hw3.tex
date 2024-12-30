@@ -1,0 +1,219 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage{minted}
+\input{math_commands}
+
+\newcommand{\wipcom}[1]{\textcolor{red}{WIP: #1}}
+\newcommand{\sol}[1]{\textcolor{gray}{sol: #1}}
+% \newcommand{\sol}[1]{}
+\newcommand{\nyuparagraph}[1]{\vspace{0.3cm}\textcolor{nyupurple}{\bf \large #1}\\}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\nll}{\rm NLL}
+
+\pagestyle{empty} \addtolength{\textwidth}{1.0in}
+\addtolength{\textheight}{0.5in} \addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{0.5in}
+\newcommand{\ruleskip}{\bigskip\hrule\bigskip}
+\newcommand{\nodify}[1]{{\sc #1}} \newcommand{\points}[1]{{\textbf{[#1
+points]}}}
+
+\newcommand{\bitem}{\begin{list}{$\bullet$}%
+{\setlength{\itemsep}{0pt}\setlength{\topsep}{0pt}%
+\setlength{\rightmargin}{0pt}}} \newcommand{\eitem}{\end{list}}
+
+\definecolor{nyupurple}{RGB}{134, 0, 179}
+\setlength{\parindent}{0pt} \setlength{\parskip}{0.5ex}
+
+\DeclareUnicodeCharacter{2212}{-}
+
+\theoremstyle{plain}
+\newtheorem*{thm*}{\protect\theoremname}
+\theoremstyle{definition}
+\newtheorem*{defn*}{\protect\definitionname}
+
+\begin{document}
+\newcounter{saveenum}
+
+\pagestyle{myheadings} \markboth{}{\color{nyupurple} CSCI-GA-2565 - Fall 2024}
+
+\begin{center}
+{\Large
+Homework 3: Bayesian ML \& Multiclass
+} 
+\end{center}
+
+{
+{ \color{nyupurple} \textbf{Due:} Tuesday, November 12, 2024  at 12 pm EST (noon)} 
+} 
+
+\textbf{Instructions: }Your answers to the questions below, including plots and mathematical
+ work, should be submitted as a single PDF file.  It's preferred that you write your answers using software that typesets mathematics (e.g.LaTeX, LyX, or MathJax via iPython), though if you need to you may scan handwritten work. 
+
+
+ \textbf{Code Submission: }Please submit your solutions in the following two files provided for the coding questions: \texttt{multiclass-skeleton-code.ipynb} and \texttt{skeleton\_code.py} without changing the file names. Questions marked with [coding] requires completing the corresponding functions in the \texttt{skeleton\_code.py} file. The \texttt{multiclass-skeleton-code.ipynb} file import functions written in the \texttt{skeleton\_code.py}. Please do not import additional libraries in \texttt{skeleton\_code.py}, otherwise the autograder may crash and no credit will be given. You should compress the files into a ZIP archive in the current directory and submit the ZIP file. We also provided two test files \texttt{test\_one\_vs\_all\_classifier.py} and \texttt{test\_multiclass\_svm.py} to test your code. It's meant to ensure that the output shapes are correctly specified. You can use the following commands \texttt{python -m unittest test\_one\_vs\_all\_classifier.py} and \texttt{python -m unittest test\_multiclass\_svm.py} to run the scripts. You don't need to submit these two test files. 
+ 
+\ruleskip
+
+\nyuparagraph{Bayesian Logistic Regression with Gaussian Priors}
+Recall from previous homework and consider a binary classification setting with input
+space $\cx=\reals^{d}$, outcome space $\cy_{\pm}=\left\{ -1,1\right\} $,
+and a dataset $\cd=\left((x^{(1)},y^{(1)}),\cdots,(x^{(n)},y^{(n)})\right)$. 
+$p(y=1 \mid x; w) = 1 / (1 + \exp(-x^Tw))$.
+
+Let's consider logistic regression in the Bayesian setting, where we introduce a prior $p(w)$ on  $w\in\reals^{d}$. 
+\begin{enumerate}
+  \setcounter{enumi}{\value{saveenum}}
+\item For the dataset $\cd$, give an expression for the posterior density $p
+ (w\mid\cd)$ in terms of the negative log-likelihood function $\nll_{\cd}
+ (w)$ and the prior density $p(w)$(up to a proportionality constant is
+ fine).
+
+\item Show that there exist a covariance matrix $\Sigma$ such that MAP (maximum a posteriori) estimate for $w$
+after observing data $\cd$ is the same as the minimizer of the regularized
+logistic regression function defined in Regularized Logistic Regression paragraph above, and give its value. {[}Hint: Consider minimizing the negative log posterior
+of $w$. Also, remember you can drop any terms from the objective
+function that don't depend on $w$. You may freely use results
+of previous problems.{]} 
+
+\item In the Bayesian approach, the prior should reflect your beliefs about
+the parameters before seeing the data and, in particular, should be
+independent on the eventual size of your dataset. Imagine choosing a prior distribution $w\sim\cn(0,I)$. For a dataset $\cd$
+of size $n$, how should you choose $\lambda$ in our regularized
+logistic regression objective function so that the ERM is equal
+to the mode of the posterior distribution of $w$ (i.e. is equal to
+the MAP estimator). 
+\setcounter{saveenum}{\value{enumi}}
+\end{enumerate}
+
+\nyuparagraph{Coin Flipping with Partial Observability}
+Consider flipping a biased coin where $p(z=H\mid \theta_1) = \theta_1$.
+However, we cannot directly observe the result $z$.
+Instead, someone reports the result to us,
+which we denotey by $x$.
+Further, there is a chance that the result is reported incorrectly \emph{if it's a head}.
+Specifically, we have $p(x=H\mid z=H, \theta_2) = \theta_2$
+and $p(x=T\mid z=T) = 1$.
+
+\begin{enumerate}
+  \setcounter{enumi}{\value{saveenum}}
+\item Show that $p(x=H\mid \theta_1, \theta_2) = \theta_1 \theta_2$.
+
+\item Given a set of reported results $\cd_r$ of size $N_r$, where the number of heads is $n_h$ and the number of tails is $n_t$, what is the likelihood of $\cd_r$ as a function of $\theta_1$ and $\theta_2$.
+
+\item Can we estimate $\theta_1$ and $\theta_2$ using MLE? Explain your judgment.
+
+\item We additionally obtained a set of clean results $\cd_c$ of size $N_c$, where $x$ is directly observed without the reporter in the middle. Given that there are $c_h$ heads and $c_t$ tails,
+estimate $\theta_1$ and $\theta_2$ by MLE taking the two data sets into account.
+Note that the likelihood is $L(\theta_1, \theta_2) = p(\cd_r, \cd_c\mid \theta_1, \theta_2)$.
+
+\item Since the clean results are expensive, we only have a small number of those and we are worried that we may overfit the data.
+To mitigate overfitting we can use a prior distribution on $\theta_1$ if available. Let's imagine that an oracle gave use the prior $p(\theta_1) = \text{Beta}(h, t)$.
+Derive the MAP estimates for $\theta_1$ and $\theta_2$.
+
+\setcounter{saveenum}{\value{enumi}}
+\end{enumerate}
+
+Suppose our output space and our action space are given as follows:
+$\cy=\ca=\left\{ 1,\ldots,k\right\} $. Given a non-negative class-sensitive
+loss function $\Delta:\cy\times\ca\to[0,\infty)$ and a class-sensitive
+feature mapping $\Psi:\cx\times\cy\to\reals^{d}$. Our prediction
+function $f:\cx\to\cy$ is given by
+\[
+f_{w}(x)=\argmax_{y\in\cy}\left\langle w,\Psi(x,y)\right\rangle .
+\]
+For training data $(x_{1},y_{1}),\ldots,(x_{n},y_{n})\in\cx\times\cy$,
+let $J(w)$ be the $\ell_{2}$-regularized empirical risk function
+for the multiclass hinge loss. We can write this as
+\[
+J(w)=\lambda\|w\|^{2}+\frac{1}{n}\sum_{i=1}^{n}\max_{y\in\cy}\left[\Delta\left(y_{i},y\right)+\left\langle w,\Psi(x_{i},y)-\Psi(x_{i},y_{i})\right\rangle \right]
+\]
+for some $\lambda>0$.
+\begin{enumerate}
+  \setcounter{enumi}{\value{saveenum}}
+\item Show that $J(w)$ is a convex function of $w$. You
+may use any of the rules about convex functions described in our \href{https://davidrosenberg.github.io/mlcourse/Notes/convex-optimization.pdf}{notes on Convex Optimization},
+in previous assignments, or in the Boyd and Vandenberghe book, though
+you should cite the general facts you are using. {[}Hint: If $f_{1},\ldots,f_{m}:\reals^{n}\to\reals$
+are convex, then their pointwise maximum $f(x)=\max\left\{ f_{1}(x),\ldots,f_{m}(x)\right\} $
+is also convex.{]}
+
+
+\item Since $J(w)$ is convex, it has a subgradient at every point. Give
+an expression for a subgradient of $J(w)$. You may use any standard
+results about subgradients, including the result from an earlier homework
+about subgradients of the pointwise maxima of functions. (Hint: It
+may be helpful to refer to $\hat{y}_{i}=\argmax_{y\in\cy}\left[\Delta\left(y_{i},y\right)+\left\langle w,\Psi(x_{i},y)-\Psi(x_{i},y_{i})\right\rangle \right]$.)
+
+
+\item Give an expression for the stochastic subgradient based on the point
+$(x_{i},y_{i})$.
+
+
+\item Give an expression for a minibatch subgradient, based on the points
+$(x_{i},y_{i}),\ldots,\left(x_{i+m-1},y_{i+m-1}\right)$.
+
+
+\setcounter{saveenum}{\value{enumi}}
+\end{enumerate}
+
+\nyuparagraph{Hinge Loss is a Special Case of Generalized Hinge
+Loss}
+
+Let $\cy=\left\{ -1,1\right\} $. Let $\Delta(y,\hat{y})=\ind{y\neq\hat{y}}.$
+If $g(x)$ is the score function in our binary classification setting,
+then define our compatibility function as 
+\begin{eqnarray*}
+h(x,1) & = & g(x)/2\\
+h(x,-1) & = & -g(x)/2.
+\end{eqnarray*}
+Show that for this choice of $h$, the multiclass hinge loss reduces
+to hinge loss: 
+\[
+\ell\left(h,\left(x,y\right)\right)=\max_{y'\in\cy}\left[\Delta\left(y,y')\right)+h(x,y')-h(x,y)\right]=\max\left\{ 0,1-yg(x)\right\} 
+\]
+
+In this problem we will work on a simple three-class classification
+example.
+The data is generated and plotted for you in the skeleton code. 
+
+\nyuparagraph{One-vs-All (also known as One-vs-Rest)}
+
+First we will implement one-vs-all multiclass classification.
+Our approach will assume we have a binary base classifier that returns
+a score, and we will predict the class that has the highest score. 
+\begin{enumerate}
+  \setcounter{enumi}{\value{saveenum}}
+\item \text{[coding]} Complete the methods \texttt{fit}, \texttt{decision\_function} and \texttt{predict} from \texttt{OneVsAllClassifier}  in \texttt{skeleton\_code.py}. Following
+the \texttt{OneVsAllClassifier} code is a cell that extracts the results of
+the fit and plots the decision region. You can have a look at it first to make sure you understand how the class will be used.
+\item  Include the results of the test cell in \texttt{multiclass-skeleton-code.ipynb} in your submission.
+\setcounter{saveenum}{\value{enumi}}
+\end{enumerate}
+
+
+\nyuparagraph{Multiclass SVM}
+
+In this question, we will implement stochastic subgradient descent
+for the linear multiclass SVM, as described in class and in this
+problem set. We will use the class-sensitive feature mapping approach
+with the ``multivector construction'', as described in the multiclass lecture.
+\begin{enumerate}
+  \setcounter{enumi}{\value{saveenum}}
+\item \text{[coding]} Complete the function \texttt{featureMap} in \texttt{skeleton\_code.py}.
+\item\text{[coding]}  Complete the function \texttt{sgd} in \texttt{skeleton\_code.py}.
+\item \text{[coding]} Complete the methods \texttt{subgradient}, \texttt{decision\_function} and \texttt{predict} from the class \texttt{MulticlassSVM} in \texttt{skeleton\_code.py}.
+\item Following the multiclass
+SVM implementation, we have included another block of test code in \texttt{multiclass-skeleton-code.ipynb}. Make
+sure to include the results from these tests in your assignment. 
+\setcounter{saveenum}{\value{enumi}}
+\end{enumerate}
+
+\end{document}
